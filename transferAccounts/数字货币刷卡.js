@@ -2,93 +2,80 @@ var KeyboardManager = require('./keyboardstrategy/KeyboardContext.js');
 var StringUtil = require('../common/stringHandle.js');
 var Cache = require('../common/cache.js');
 var DateUtil = require('../common/moment.js');
-console.show(true);
-checkHasDone();
-// // 打开微信
+//console.show(true);
+// checkHasDone();
+// // 打开数字人民币
 openWeChatApp();
-// 微信点击更多功能按钮
-clickMoreFunctionButton();
 // 点击扫一扫
 clickSweepButton();
 // 打开相册
 openPhotoAlbum();
 // 点击指定商户收款码
-clickFolderInQRImg("彭妙妙商户码");
+clickFolderInQRImg("郭金秀数币");
 // 输入支付价格
-inputPayPrice("100");
+// inputPayPrice("100");
 // 支付
-pay("100");
+// pay("100");
 
 
 function openWeChatApp() {
-    var opend = launchApp("微信");
-    console.info("打开微信");
+    var opend = launchApp("数字人民币");
+    console.info("数字人民币");
     if (!opend) {
-        console.info("找不到微信，请确定是否安装");
+        console.info("找不到数字人民币，请确定是否安装");
         return;
     }
-}
-
-function clickMoreFunctionButton() {
-    var moreFunctionButInfo = desc("更多功能按钮").findOne(10000);
-    if (moreFunctionButInfo == null) {
-        console.info("当前不在微信首页");
-        return;
-    }
-    console.info("点击更多按钮");
-    // 点击更多按钮
-    moreFunctionButInfo.click();
 }
 
 function clickSweepButton() {
-    // 唤起更多选项
-    var moreFunctionInfo = className("android.widget.ListView").findOne(300);
-    if (moreFunctionInfo == null) {
-        console.info("更多选项不存在");
-    }
-    // 定位到扫一扫
-    console.info("定位到扫一扫");
-    var sweepButInfo = moreFunctionInfo.child(2);
-
-    // 点击扫一扫
     console.info("点击扫一扫");
-    sweepButInfo.click();
+    var ll_scan = id("ll_scan").findOne(4000);
+    if(ll_scan == null){
+        throw Error("控件未加载完全！ 不会执行数币刷卡任务！");
+    }
+    ll_scan.click();
 }
 
 function openPhotoAlbum() {
     sleep(3000);
-    console.info("找到相册");
-    var photoAlbumBut = desc("相册，按钮").findOne(200);
-    // 打开相册
-    photoAlbumBut.click();
-    console.info("打开相册 等待相册控件出现 3秒");
-    sleep(3000);
+    id("scan_iv_album").findOne().click();
+    // 点击相册
+    console.info("进入相册成功！");
 }
 
 function clickFolderInQRImg(folderName) {
-    // 点击下拉
-    id("f6").findOne(5000).click();
-    sleep(4000);
-    // 找图片文件夹
+    sleep(3000);
+    console.info("点击 显示根目录 ");
+    className("android.widget.ImageButton").findOne(100).click();
+    sleep(3000);
+    // 点击相册
+    console.info("点击进入相册");
+    var 相册 = className("android.widget.TextView").text("相册").findOne();
+
+    click(相册.bounds().centerX(), 相册.bounds().centerY());
+
+    sleep(1000);
+    var title_center_view_text = id("title_center_view_text").findOne(5000);
+    press(title_center_view_text.bounds().centerX(), title_center_view_text.bounds().centerY(), 700);
+    // 找图片文件夹 
     let folder = null;
     while (folder == null) {
-        folder = id("ebv").className("android.widget.TextView").text(folderName).findOne(3000);
+        folder = id("item_name").className("android.widget.TextView").text("郭金秀数币").findOne(3000)
         if (folder == null) {
             // 滑动
-            className("android.widget.ListView").findOne().scrollForward();
+            id("rv_album_list").findOne().scrollForward();
             console.info("文件夹不存在, 正在尝试往下滑动!! 等待3秒让控件出现");
             sleep(3000);
         }
     }
     console.info("点击文件夹：", folderName);
     // 进入收藏夹
-    folder.parent().parent().click();
-    console.info("等4秒让控件充分展示");
-    sleep(4000);
+    folder.click();
+    console.info("等3秒让控件充分展示");
+    sleep(3000);
     // 点击选图片
     console.info("点击选图片");
-    var imgInfo = id("gqb").findOne(10000);
-    var imgOne = imgInfo.child(1);
+    var imgOne = className("android.view.View").descContains("已收藏").findOne();
     imgOne.click();
 }
 
