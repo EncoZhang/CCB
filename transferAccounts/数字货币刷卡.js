@@ -13,7 +13,7 @@ openPhotoAlbum();
 // 点击指定商户收款码
 clickFolderInQRImg("郭金秀数币");
 // 输入支付价格
-// inputPayPrice("100");
+inputPayPrice("1");
 // 支付
 // pay("100");
 
@@ -56,11 +56,12 @@ function clickFolderInQRImg(folderName) {
 
     sleep(1000);
     var title_center_view_text = id("title_center_view_text").findOne(5000);
-    press(title_center_view_text.bounds().centerX(), title_center_view_text.bounds().centerY(), 700);
+    press(title_center_view_text.bounds().centerX(), title_center_view_text.bounds().centerY(), 200);
+    sleep(2000);
     // 找图片文件夹 
     let folder = null;
     while (folder == null) {
-        folder = id("item_name").className("android.widget.TextView").text("郭金秀数币").findOne(3000)
+        folder = className("android.widget.TextView").text("郭金秀数币").findOne(5000);
         if (folder == null) {
             // 滑动
             id("rv_album_list").findOne().scrollForward();
@@ -68,11 +69,13 @@ function clickFolderInQRImg(folderName) {
             sleep(3000);
         }
     }
-    console.info("点击文件夹：", folderName);
-    // 进入收藏夹
-    folder.click();
+    var folderParent = folder.parent().parent().parent();
+    console.info("点击文件夹：", folderName, folderParent);
+    console.info(folderParent.bounds().centerX(), folderParent.bounds().centerY());
+    click(folderParent.bounds().centerX(), folderParent.bounds().centerY());
+    // 进入数币文件夹
     console.info("等3秒让控件充分展示");
-    sleep(3000);
+    sleep(2000);
     // 点击选图片
     console.info("点击选图片");
     var imgOne = className("android.view.View").descContains("已收藏").findOne();
@@ -82,16 +85,12 @@ function clickFolderInQRImg(folderName) {
 function inputPayPrice(payPrice) {
     console.info("等待进入支付页面");
     // 等待进入支付页面
-    sleep(6000);
+    sleep(3000);
     console.info("进入成功");
-    var strategy = KeyboardManager.getStrategy("工行");
-    // 输入价格
-    strategy.inMoney(payPrice);
+    var et_scan_input_edit = id("et_scan_input_edit").findOne();
+    et_scan_input_edit.setText("1");
     console.info("去支付");
-
-    var pay = text("付款").findOne(5000);
-    // 目前就只能
-    click(137.8, 1085);
+    press(940,2202.3, 700);
 }
 
 function pay(payMoney) {
