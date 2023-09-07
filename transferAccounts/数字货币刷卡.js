@@ -3,7 +3,7 @@ var StringUtil = require('../common/stringHandle.js');
 var Cache = require('../common/cache.js');
 var DateUtil = require('../common/moment.js');
 //console.show(true);
-// checkHasDone();
+checkHasDone();
 // // 打开数字人民币
 openWeChatApp();
 // 点击扫一扫
@@ -13,9 +13,12 @@ openPhotoAlbum();
 // 点击指定商户收款码
 clickFolderInQRImg("郭金秀数币");
 // 输入支付价格
-inputPayPrice("1");
+inputPayPrice("288");
 // 支付
-// pay("100");
+pay("199145");
+// 丢缓存
+Cache.putStorage("eRMB", DateUtil.nowDate() + "建行卡", "288");
+
 
 
 function openWeChatApp() {
@@ -88,80 +91,25 @@ function inputPayPrice(payPrice) {
     sleep(3000);
     console.info("进入成功");
     var et_scan_input_edit = id("et_scan_input_edit").findOne();
-    et_scan_input_edit.setText("1");
+    et_scan_input_edit.setText(payPrice);
     console.info("去支付");
     press(940,2202.3, 700);
+    var cashier_main_tv_psw = id("cashier_main_tv_psw").findOne(7000);
+    cashier_main_tv_psw.click();
+    sleep(5000);
 }
 
 function pay(payMoney) {
-    // 如果有原价显示代表当前银行卡有立减金，
-    var originalPrice = className("android.widget.TextView").text("原价").findOne(3000);
-    if(originalPrice != null){
-        console.info("当前银行卡支付存在优惠，准备取消使用立减金, 点击进入立减金页面");
-        var discounts = className("android.widget.Button").clickable(true).depth(19).findOne(5000);
-        if (discounts != null) {
-            // 进入优惠列表
-            discounts.click();
-            console.info("进入优惠列表");
-            var choiceCoupon = className("android.view.ViewGroup").descContains("已选择").findOne(1000);
-            choiceCoupon.click();
-            // 确定不使用优惠
-            sleep(1000);
-            console.info("取消使用优惠券");
-            var but = id("fga").className("android.widget.Button").desc("确定").findOne(6000).parent();
-            console.info("确定不使用优惠券");
-            click(but.bounds().centerX(), but.bounds().centerY());
-        }
-    }
-    // 选择银行卡支付
-    var getPayInfo = className("android.widget.Button").clickable(true).depth(18).findOne(5000);
-    var payDesc = getPayInfo.desc();
-    console.info(payDesc);
-    var bankCardLastFour = StringUtil.getNumber(payDesc);
-    console.info("bankCardLastFour= ", bankCardLastFour);
-    var bankCardName = StringUtil.getChineseChars(payDesc);
-    console.info("bankCardName= ", bankCardName);
-    // 非指定银行卡就切换成
-    if(checkBankCardInfo()){
-        getPayInfo.click();
-        console.info("点击进入 进入切换银行卡页面");
-        sleep(2000);
-        var bankCardScroll = className("android.widget.ScrollView").findOne(4000);
-        bankCardScroll.scrollDown();
-        console.info("下滑到底等待控件出现");
-        sleep(3000);
-        var icbcInfo = className("android.widget.TextView").text("工商银行信用卡(5864)").findOne(50000);
-        if(icbcInfo == null){
-            throw Error("指定的工行信用卡不存在");
-        }
-        // 查找这个银行可以点击的控件
-        var icbcInfoParent = icbcInfo.parent().parent().parent().parent().parent();
-        // 选中
-        icbcInfoParent.click();
-        console.info("已选中");
-    }
-    console.info("准备输入密码");
-    sleep(3000);
-    // // 密码输入
-    var passWord = KeyboardManager.getStrategy("微信");
-    passWord.inMoney("00951");
-    Cache.putStorage("Wechat", DateUtil.nowDate() + "工商银行信用卡:5864", payMoney);
-
-}
-
-function checkBankCardInfo(bankCardLastFour, bankCardName){
-    var check = bankCardLastFour != '5864' || !bankCardName.includes("工商银行信用卡");
-    console.info("check=", check);
-    return check;
+    var strategy = KeyboardManager.getStrategy("数币");
+    strategy.inMoney(payMoney);
 }
 
 function checkHasDone() {
     console.info(DateUtil.nowDate());
     console.info(DateUtil.yesterday());
-    var payMoney = Cache.getStorage("Wechat", DateUtil.nowDate() + "工商银行信用卡:5864");
-    Cache.removeStorage("Wechat", DateUtil.yesterday() + "工商银行信用卡:5864");
+    var payMoney = Cache.getStorage("eRMB", DateUtil.nowDate() + "建行卡");
+    Cache.removeStorage("eRMB", DateUtil.yesterday() + "建行卡");
     if(payMoney != null){
-        throw Error("今日微信扫码支付已进做完了");
+        throw Error("今日建行数币已做完");
     }
 }
-
